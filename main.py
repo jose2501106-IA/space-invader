@@ -10,12 +10,20 @@ from DrawingClass import Drawing
 from PantallaNombreClass import PantallaNombre
 from MenuPuntajesClass import MenuPuntajes
 from MenuAcercaDeClass import MenuAcercaDe
+from MenuPrincipalClass import MenuPrincipal
 
 
 WIDTH, HEIGHT = 800, 600
 FPS = 60
 ENEMY_INITIAL_SPEED = 2
 ENEMY_COUNT = 5
+
+# Globales seteados por setup_pygame() y consumidos por las funciones de
+# flujo (iniciar_juego, iniciar_puntajes, ...). Es la forma más simple de
+# mantener una sola ventana viva durante toda la sesión.
+window = None
+explosion_sound = None
+win_sound = None
 
 
 def start_music():
@@ -40,16 +48,12 @@ def load_sfx(path, volume=0.6):
         return None
 
 
-def spawn_wave(level):
-    """Genera una nueva oleada para el nivel dado. Escalado leve a propósito.
-    Nivel 1 arranca a speed puro (2.0); los siguientes escalan ×1.1 por nivel.
+def setup_pygame():
+    """Inicialización única (Fase 11): pygame, ventana, ícono, caption,
+    música y SFX. Se llama UNA sola vez desde el entry point. El resto
+    del flujo (juego y menús) reusa los globales que setea esta función.
     """
-    speed = ENEMY_INITIAL_SPEED * (1.1 ** (level - 1))
-    count = ENEMY_COUNT + level - 1
-    return Enemy(speed).create(count, WIDTH)
-
-
-def main():
+    global window, explosion_sound, win_sound
     pygame.init()
     window = pygame.display.set_mode((WIDTH, HEIGHT))
 
@@ -61,6 +65,25 @@ def main():
     explosion_sound = load_sfx('sounds/explosion.wav', volume=0.5)
     win_sound = load_sfx('sounds/ganar.mp3', volume=0.7)
 
+
+def spawn_wave(level):
+    """Genera una nueva oleada para el nivel dado. Escalado leve a propósito.
+    Nivel 1 arranca a speed puro (2.0); los siguientes escalan ×1.1 por nivel.
+    """
+    speed = ENEMY_INITIAL_SPEED * (1.1 ** (level - 1))
+    count = ENEMY_COUNT + level - 1
+    return Enemy(speed).create(count, WIDTH)
+
+
+def iniciar_juego():
+    """Game loop. Retorna naturalmente al terminar (game over o ESC), para
+    que mostrar_menu_principal() siga su loop al recibir el control.
+
+    FIX (Fase 11): ESC ya NO cierra la app — solo termina el game loop y
+    vuelve al menú. QUIT (cerrar la ventana) sigue cerrando la app entera.
+    Antes Game.escape(events) mezclaba ambos en un bool; ahora chequeamos
+    los eventos a mano para diferenciarlos.
+    """
     font = pygame.font.SysFont('comicsans', 30)
 
     Enemy.load_assets()
@@ -78,90 +101,72 @@ def main():
     )
 
     enemies = spawn_wave(game.level)
-
     drawing = Drawing(window)
-
     puntaje = 0
 
     running = True
     while running:
-        # a) tick
         game.clock.tick(FPS)
 
-        # b) eventos (un solo event.get() por frame)
         events = pygame.event.get()
-        if game.escape(events):
-            running = False
-            break
-
-        # TEMP-FASE-9: atajo 'P' abre MenuPuntajes desde el game loop.
-        # TEMP-FASE-10: atajo 'I' (info) abre MenuAcercaDe. NO usar 'A'
-        # porque WASD ya la usa para mover el player a la izquierda.
-        # Borrar ambos cuando MenuPrincipal sea el entry point (Fase 11).
         for ev in events:
-            if ev.type == pygame.KEYDOWN and ev.key == pygame.K_p:
-                pygame.mixer.music.pause()
-                MenuPuntajes(window, back_mtd=lambda: None).ejecutar()
-                pygame.mixer.music.unpause()
-            elif ev.type == pygame.KEYDOWN and ev.key == pygame.K_i:
-                pygame.mixer.music.pause()
-                MenuAcercaDe(window, back_mtd=lambda: None).ejecutar()
-                pygame.mixer.music.unpause()
+            if ev.type == pygame.QUIT:
+                pygame.mixer.music.stop()
+                pygame.quit()
+                sys.exit()
+            if ev.type == pygame.KEYDOWN and ev.key == pygame.K_ESCAPE:
+                running = False
+        if not running:
+            break
 
         # c-e) lógica del jugador
         player.create_bullets()
-        # HUD muestra balas listas reales (no decorativo).
         game.reload_bullet(len(player.bullets))
         player.cooldown()
         player.move(WIDTH, HEIGHT)
 
-        # f) enemigos: mover y respawnear si salen por abajo
+        # f) enemigos
         for enemy in enemies:
             enemy.move()
             if enemy.y > HEIGHT:
                 enemy.y = random.randrange(-1000, -100)
 
-        # g) colisiones — recorremos inverso para poder remover sin romper
-        #    iteración. Combinamos bala→enemy y enemy→player en un solo paso.
+        # g) colisiones
         for i in range(len(enemies) - 1, -1, -1):
             enemy = enemies[i]
-            # Bala → enemigo: hit() ya remueve la bala internamente.
             if player.hit(enemy):
                 enemies.pop(i)
                 puntaje += 1
                 if explosion_sound:
                     explosion_sound.play()
                 continue
-            # Enemigo → jugador: pixel-perfect con offset relativo.
             offset = (int(enemy.x - player.x), int(enemy.y - player.y))
             if player.mask.overlap(enemy.mask, offset):
                 game.lives -= 1
                 enemies.pop(i)
 
-        # h) game over (chequeo no bloqueante)
+        # h) game over
         if game.over():
-            # Récord nuevo → win sound + PantallaNombre para grabar nombre.
             if puntaje > game.max_pun:
                 if win_sound:
                     win_sound.play()
                 print(f'[NEW RECORD] {puntaje} > {game.max_pun}')
-                # Pausamos la música mientras el jugador escribe (la win
-                # sound y la música se solapan feo). En Fase 11 el callback
-                # finish_mtd llevará al menú principal; por ahora es no-op.
                 pygame.mixer.music.pause()
+                # finish_mtd como no-op: tras Aceptar, PantallaNombre retorna
+                # naturalmente y caemos al show_game_over_screen() de abajo.
+                # Después, este iniciar_juego() retorna y MenuPrincipal sigue
+                # vivo en su propio loop (unwinding limpio, sin recursión).
                 PantallaNombre(window, puntaje, finish_mtd=lambda: None).ejecutar()
                 pygame.mixer.music.unpause()
-            # un último frame con el estado actual y luego la pantalla GO
             drawing.drawing(game, player, enemies, FPS, puntaje)
             game.show_game_over_screen()
-            break
+            return
 
-        # i) fin de oleada → subir nivel y regenerar
+        # i) fin de oleada
         if not enemies:
             game.level += 1
             player.increase_speed()
-            # BALANCE: caps de 10 balas y 6 vidas vienen del .md original;
-            # iterar si se siente OP.
+            # BALANCE: caps 10 balas / 6 vidas.
             if game.level % 3 == 0:
                 if player.max_amount_bullets < 10:
                     player.max_amount_bullets += 1
@@ -169,13 +174,39 @@ def main():
                     game.lives += 1
             enemies = spawn_wave(game.level)
 
-        # j) render encapsulado (fondo, enemigos, player, balas, HUD, flip)
+        # j) render
         drawing.drawing(game, player, enemies, FPS, puntaje)
 
-    pygame.mixer.music.stop()
-    pygame.quit()
-    sys.exit()
+    # Salida vía ESC: retorno limpio al caller (mostrar_menu_principal).
+
+
+def iniciar_puntajes():
+    """Abre MenuPuntajes desde el menú principal. back_mtd no-op: el
+    unwinding natural devuelve el control al loop de MenuPrincipal."""
+    MenuPuntajes(window, back_mtd=lambda: None).ejecutar()
+
+
+def iniciar_acerca_de():
+    """Abre MenuAcercaDe desde el menú principal. back_mtd no-op: el
+    unwinding natural devuelve el control al loop de MenuPrincipal."""
+    MenuAcercaDe(window, back_mtd=lambda: None).ejecutar()
+
+
+def mostrar_menu_principal():
+    """Punto de entrada al flujo: crea MenuPrincipal y entra a su loop.
+
+    Las referencias circulares (este menú apunta a iniciar_juego/_puntajes/
+    _acerca_de y esos a su vez apuntan acá vía back_mtd) se resuelven solas
+    porque Python evalúa los nombres en runtime, no al definirlos.
+    """
+    MenuPrincipal(
+        window,
+        init_game_mtd=iniciar_juego,
+        init_score_mtd=iniciar_puntajes,
+        init_about_mtd=iniciar_acerca_de,
+    ).mostrar()
 
 
 if __name__ == '__main__':
-    main()
+    setup_pygame()
+    mostrar_menu_principal()

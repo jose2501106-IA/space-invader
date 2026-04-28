@@ -61,16 +61,6 @@ class Game:
         registros.sort(key=lambda t: t[1], reverse=True)
         return registros[:5]
 
-    # FIX: receive events list to avoid double event.get() race.
-    # Bonus UX: ESC también cierra (además del botón X de la ventana).
-    def escape(self, events):
-        for event in events:
-            if event.type == pygame.QUIT:
-                return True
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                return True
-        return False
-
     # FIX: el original tenía un mini-loop interno bloqueante mezclado con la
     # lógica de detección. Ahora over() solo decide si el juego terminó;
     # show_game_over_screen() se encarga de la presentación.

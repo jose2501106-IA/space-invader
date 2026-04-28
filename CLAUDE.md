@@ -148,14 +148,14 @@ Las imágenes deben estar en `img/`. Si el usuario aún no las tiene, **generar 
 El proyecto base (Fases 0–5) está terminado. A partir de acá lo convertimos en
 una aplicación con menús, navegación y puntajes persistentes.
 
-| Fase | Entregable |
-|------|------------|
-| 6 | Setup assets nuevos (sounds/, puntajes.txt, menú imgs) + bonus gameplay (HUD balas reales, +1 vida y +1 bala max cada 3 niveles) |
-| 7 | Sistema de puntaje (variable puntaje, lectura de puntajes.txt en Game, "Points: N" en HUD) + sonidos (explosion.wav, ganar.mp3) |
-| 8 | PantallaNombreClass — input al batir récord, escribe nombre,puntaje en puntajes.txt |
-| 9 | MenuPuntajesClass — top 5 leído de archivo, botón "<" volver |
-| 10 | MenuAcercaDeClass — info + link clickeable a Hybridge, botón "<" volver |
-| 11 | MenuPrincipalClass + integración total (refactor main para que el menú sea entrada) |
+| Fase | Entregable | Estado |
+|------|------------|--------|
+| 6 | Setup assets nuevos (sounds/, puntajes.txt, menú imgs) + bonus gameplay (HUD balas reales, +1 vida y +1 bala max cada 3 niveles) | ✅ |
+| 7 | Sistema de puntaje (variable puntaje, lectura de puntajes.txt en Game, "Points: N" en HUD) + sonidos (explosion.wav, ganar.mp3) | ✅ |
+| 8 | PantallaNombreClass — input al batir récord, escribe nombre,puntaje en puntajes.txt | ✅ |
+| 9 | MenuPuntajesClass — top 5 leído de archivo, botón "<" volver | ✅ |
+| 10 | MenuAcercaDeClass — info + link clickeable a Hybridge, botón "<" volver | ✅ |
+| 11 | MenuPrincipalClass + integración total (refactor main para que el menú sea entrada) | ✅ |
 
 ## 🧱 Convenciones para las nuevas clases de menú
 
