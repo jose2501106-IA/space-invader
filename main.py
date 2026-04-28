@@ -75,6 +75,62 @@ def spawn_wave(level):
     return Enemy(speed).create(count, WIDTH)
 
 
+def _build_pause_overlay():
+    """Surface SRCALPHA con velo negro semi-transparente + textos de pausa.
+    Se construye una sola vez por entrada al sub-loop (no por frame)."""
+    overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+    overlay.fill((0, 0, 0, 128))
+
+    font_title = pygame.font.SysFont('comicsans', 80)
+    font_hint = pygame.font.SysFont('comicsans', 28)
+    font_esc = pygame.font.SysFont('comicsans', 24)
+
+    title = font_title.render('PAUSA', True, (255, 255, 255))
+    overlay.blit(
+        title,
+        (WIDTH // 2 - title.get_width() // 2, HEIGHT // 2 - 50),
+    )
+    hint = font_hint.render('Presiona P para continuar', True, (200, 200, 200))
+    overlay.blit(
+        hint,
+        (WIDTH // 2 - hint.get_width() // 2, HEIGHT // 2 + 30),
+    )
+    esc = font_esc.render('ESC vuelve al menú principal', True, (180, 180, 180))
+    overlay.blit(
+        esc,
+        (WIDTH // 2 - esc.get_width() // 2, HEIGHT // 2 + 70),
+    )
+    return overlay
+
+
+def _pause_loop(drawing, game, player, enemies, puntaje, overlay):
+    """Sub-loop bloqueante de pausa. Devuelve:
+       'resume' → seguir jugando (P presionado)
+       'menu'   → salir al menú principal (ESC presionado)
+    Maneja QUIT también (cierra app)."""
+    pygame.mixer.music.pause()
+    clock = pygame.time.Clock()
+    while True:
+        clock.tick(30)  # 30 FPS basta estando pausado.
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.mixer.music.stop()
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_p:
+                    pygame.mixer.music.unpause()
+                    return 'resume'
+                if event.key == pygame.K_ESCAPE:
+                    pygame.mixer.music.unpause()
+                    return 'menu'
+
+        # Re-renderiza el último frame congelado y le superpone el overlay.
+        drawing.drawing(game, player, enemies, FPS, puntaje)
+        window.blit(overlay, (0, 0))
+        pygame.display.update()
+
+
 def iniciar_juego():
     """Game loop. Retorna naturalmente al terminar (game over o ESC), para
     que mostrar_menu_principal() siga su loop al recibir el control.
@@ -104,6 +160,9 @@ def iniciar_juego():
     drawing = Drawing(window)
     puntaje = 0
 
+    # Overlay de pausa pre-construido (SRCALPHA + textos). Una sola vez.
+    pause_overlay = _build_pause_overlay()
+
     running = True
     while running:
         game.clock.tick(FPS)
@@ -116,6 +175,12 @@ def iniciar_juego():
                 sys.exit()
             if ev.type == pygame.KEYDOWN and ev.key == pygame.K_ESCAPE:
                 running = False
+            if ev.type == pygame.KEYDOWN and ev.key == pygame.K_p:
+                # Sub-loop bloqueante. Devuelve 'resume' o 'menu'.
+                resultado = _pause_loop(
+                    drawing, game, player, enemies, puntaje, pause_overlay)
+                if resultado == 'menu':
+                    running = False
         if not running:
             break
 

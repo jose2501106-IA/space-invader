@@ -11,7 +11,9 @@ se queda sin vidas.
 ## 🎮 Controles
 - **Mover**: `WASD` o flechas (`↑ ← ↓ →`).
 - **Disparar**: `SPACE` (máximo 3 balas en vuelo, con cooldown).
-- **Salir**: `ESC` o cerrar la ventana.
+- **Pausar / reanudar**: `P` (durante el juego).
+- **Volver al menú**: `ESC` (sale al menú principal sin cerrar la app).
+- **Cerrar app**: `ESC` en el menú principal o cerrar la ventana.
 
 ## 🛠️ Requisitos
 - Python 3.10+ (probado en 3.14).
