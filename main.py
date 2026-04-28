@@ -10,6 +10,7 @@ from DrawingClass import Drawing
 from PantallaNombreClass import PantallaNombre
 from MenuPuntajesClass import MenuPuntajes
 from MenuAcercaDeClass import MenuAcercaDe
+from MenuInstruccionesClass import MenuInstrucciones
 from MenuPrincipalClass import MenuPrincipal
 
 
@@ -245,6 +246,12 @@ def iniciar_juego():
     # Salida vía ESC: retorno limpio al caller (mostrar_menu_principal).
 
 
+def iniciar_instrucciones():
+    """Abre MenuInstrucciones desde el menú principal. back_mtd no-op:
+    el unwinding natural devuelve el control al loop de MenuPrincipal."""
+    MenuInstrucciones(window, back_mtd=lambda: None).ejecutar()
+
+
 def iniciar_puntajes():
     """Abre MenuPuntajes desde el menú principal. back_mtd no-op: el
     unwinding natural devuelve el control al loop de MenuPrincipal."""
@@ -267,6 +274,7 @@ def mostrar_menu_principal():
     MenuPrincipal(
         window,
         init_game_mtd=iniciar_juego,
+        init_instructions_mtd=iniciar_instrucciones,
         init_score_mtd=iniciar_puntajes,
         init_about_mtd=iniciar_acerca_de,
     ).mostrar()

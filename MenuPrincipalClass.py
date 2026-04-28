@@ -34,9 +34,11 @@ class MenuPrincipal:
                 print(f'[warn] no se pudo cargar img/hybridge.gif: {e}')
                 cls.HYBRIDGE_LOGO = None
 
-    def __init__(self, window, init_game_mtd, init_score_mtd, init_about_mtd):
+    def __init__(self, window, init_game_mtd, init_instructions_mtd,
+                 init_score_mtd, init_about_mtd):
         self.window = window
         self.init_game_mtd = init_game_mtd
+        self.init_instructions_mtd = init_instructions_mtd
         self.init_score_mtd = init_score_mtd
         self.init_about_mtd = init_about_mtd
 
@@ -63,7 +65,7 @@ class MenuPrincipal:
         self.font_subtitulo = pygame.font.SysFont('comicsans', 36)
         self.font_opciones = pygame.font.SysFont('comicsans', 32)
 
-        self.opciones = ['Iniciar juego', 'Puntajes', 'Acerca de']
+        self.opciones = ['Iniciar juego', 'Instrucciones', 'Puntajes', 'Acerca de']
         self.opcion_seleccionada = 0
 
     def _draw(self):
@@ -95,9 +97,10 @@ class MenuPrincipal:
                 (w // 2 - self._logo_scaled.get_width() // 2, 200),
             )
 
-        # Opciones — empiezan en y=340, espaciado de 70px entre ítems.
+        # Opciones — empiezan en y=340, espaciado de 60px (4 opciones caben
+        # holgadas dentro de los 600px: la última cae en y=520 + 50 = 570).
         y_base = 340
-        item_height = 70
+        item_height = 60
         for i, opcion in enumerate(self.opciones):
             label = self.font_opciones.render(opcion, True, (255, 255, 255))
             x = w // 2 - label.get_width() // 2
@@ -129,17 +132,19 @@ class MenuPrincipal:
                         pygame.quit()
                         sys.exit()
                     elif event.key == pygame.K_UP:
-                        self.opcion_seleccionada = (self.opcion_seleccionada - 1) % 3
+                        self.opcion_seleccionada = (self.opcion_seleccionada - 1) % 4
                     elif event.key == pygame.K_DOWN:
-                        self.opcion_seleccionada = (self.opcion_seleccionada + 1) % 3
+                        self.opcion_seleccionada = (self.opcion_seleccionada + 1) % 4
                     elif event.key == pygame.K_RETURN:
                         # Después de la llamada NO hacemos return: el while
                         # sigue y volvemos a renderizar el menú al regresar.
                         if self.opcion_seleccionada == 0:
                             self.init_game_mtd()
                         elif self.opcion_seleccionada == 1:
-                            self.init_score_mtd()
+                            self.init_instructions_mtd()
                         elif self.opcion_seleccionada == 2:
+                            self.init_score_mtd()
+                        elif self.opcion_seleccionada == 3:
                             self.init_about_mtd()
 
             self._draw()

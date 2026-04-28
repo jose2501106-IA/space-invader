@@ -9,6 +9,10 @@ se queda sin vidas.
 <!-- TODO: insertar capturas de pantalla -->
 
 ## 🎮 Controles
+
+Todos los controles también están disponibles en la pantalla **Instrucciones**
+del menú principal.
+
 - **Mover**: `WASD` o flechas (`↑ ← ↓ →`).
 - **Disparar**: `SPACE` (máximo 3 balas en vuelo, con cooldown).
 - **Pausar / reanudar**: `P` (durante el juego).
