@@ -6,6 +6,7 @@ import pygame
 from GameClass import Game
 from EnemyClass import Enemy
 from PlayerClass import Player
+from DrawingClass import Drawing
 
 
 WIDTH, HEIGHT = 800, 600
@@ -26,6 +27,7 @@ def main():
 
     Enemy.load_assets()
     Player.load_assets()
+    Drawing.load_assets()
 
     game = Game(font, FPS, lives=5, window=window,
                 screen_width=WIDTH, screen_height=HEIGHT, bullets=3)
@@ -39,6 +41,8 @@ def main():
 
     enemies = Enemy(ENEMY_INITIAL_SPEED).create(ENEMY_COUNT, WIDTH)
 
+    drawing = Drawing(window)
+
     running = True
     while running:
         # a) tick
@@ -50,32 +54,19 @@ def main():
             running = False
             break
 
-        # c) limpiar fondo
-        window.fill((0, 0, 0))
-
-        # d-f) lógica del jugador
+        # c-e) lógica del jugador
         player.create_bullets()
         player.cooldown()
         player.move(WIDTH, HEIGHT)
 
-        # g) enemigos: mover, respawn, dibujar
+        # f) enemigos: mover y respawnear (el draw lo hace Drawing)
         for enemy in enemies:
             enemy.move()
             if enemy.y > HEIGHT:
                 enemy.y = random.randrange(-1000, -100)
-            enemy.draw(window)
 
-        # h) dibujar player
-        player.draw(window)
-
-        # i) disparar (también mueve y dibuja las balas en vuelo)
-        player.fire(window)
-
-        # j) HUD encima de todo
-        game.draw_HUD()
-
-        # k) flip
-        pygame.display.update()
+        # g) render encapsulado (fondo, enemigos, player, balas, HUD, flip)
+        drawing.drawing(game, player, enemies, FPS)
 
     pygame.quit()
     sys.exit()
