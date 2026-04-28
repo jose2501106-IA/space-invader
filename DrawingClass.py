@@ -3,6 +3,8 @@ import pygame
 
 class Drawing:
     BACKGROUND = None
+    # Activar desde main.py (Drawing.DEBUG = True) para ver FPS reales.
+    DEBUG = False
 
     @classmethod
     def load_assets(cls):
@@ -35,5 +37,12 @@ class Drawing:
         # e) HUD por encima de todo
         game.draw_HUD()
 
-        # f) flip
+        # f) overlay opcional de FPS reales (debug)
+        if Drawing.DEBUG:
+            fps_label = game.font.render(
+                f'FPS: {int(game.clock.get_fps())}', True, (0, 255, 0))
+            self.window.blit(
+                fps_label, (10, self.window.get_height() - fps_label.get_height() - 10))
+
+        # g) flip
         pygame.display.update()

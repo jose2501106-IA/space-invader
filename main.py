@@ -15,6 +15,26 @@ ENEMY_INITIAL_SPEED = 2
 ENEMY_COUNT = 5
 
 
+def start_music():
+    """Inicia la música de fondo en loop. Si falla, loguea y sigue."""
+    try:
+        pygame.mixer.init()
+        pygame.mixer.music.load('music.mp3')
+        pygame.mixer.music.set_volume(0.4)
+        pygame.mixer.music.play(-1)
+    except pygame.error as e:
+        print(f'[warn] no se pudo iniciar la música: {e}')
+
+
+def spawn_wave(level):
+    """Genera una nueva oleada para el nivel dado. Escalado leve a propósito.
+    Nivel 1 arranca a speed puro (2.0); los siguientes escalan ×1.1 por nivel.
+    """
+    speed = ENEMY_INITIAL_SPEED * (1.1 ** (level - 1))
+    count = ENEMY_COUNT + level - 1
+    return Enemy(speed).create(count, WIDTH)
+
+
 def main():
     pygame.init()
     window = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -22,6 +42,8 @@ def main():
     icon = pygame.image.load('img/title_icon.png')
     pygame.display.set_icon(icon)
     pygame.display.set_caption('Space Invader')
+
+    start_music()
 
     font = pygame.font.SysFont('comicsans', 30)
 
@@ -39,7 +61,7 @@ def main():
         y_speed=5,
     )
 
-    enemies = Enemy(ENEMY_INITIAL_SPEED).create(ENEMY_COUNT, WIDTH)
+    enemies = spawn_wave(game.level)
 
     drawing = Drawing(window)
 
@@ -59,15 +81,43 @@ def main():
         player.cooldown()
         player.move(WIDTH, HEIGHT)
 
-        # f) enemigos: mover y respawnear (el draw lo hace Drawing)
+        # f) enemigos: mover y respawnear si salen por abajo
         for enemy in enemies:
             enemy.move()
             if enemy.y > HEIGHT:
                 enemy.y = random.randrange(-1000, -100)
 
-        # g) render encapsulado (fondo, enemigos, player, balas, HUD, flip)
+        # g) colisiones — recorremos inverso para poder remover sin romper
+        #    iteración. Combinamos bala→enemy y enemy→player en un solo paso.
+        for i in range(len(enemies) - 1, -1, -1):
+            enemy = enemies[i]
+            # Bala → enemigo: hit() ya remueve la bala internamente.
+            if player.hit(enemy):
+                enemies.pop(i)
+                continue
+            # Enemigo → jugador: pixel-perfect con offset relativo.
+            offset = (int(enemy.x - player.x), int(enemy.y - player.y))
+            if player.mask.overlap(enemy.mask, offset):
+                game.lives -= 1
+                enemies.pop(i)
+
+        # h) game over (chequeo no bloqueante)
+        if game.over():
+            # un último frame con el estado actual y luego la pantalla GO
+            drawing.drawing(game, player, enemies, FPS)
+            game.show_game_over_screen()
+            break
+
+        # i) fin de oleada → subir nivel y regenerar
+        if not enemies:
+            game.level += 1
+            player.increase_speed()
+            enemies = spawn_wave(game.level)
+
+        # j) render encapsulado (fondo, enemigos, player, balas, HUD, flip)
         drawing.drawing(game, player, enemies, FPS)
 
+    pygame.mixer.music.stop()
     pygame.quit()
     sys.exit()
 
