@@ -142,3 +142,45 @@ Las imágenes deben estar en `img/`. Si el usuario aún no las tiene, **generar 
 - Si encuentras un bug del código original de los .md, **arréglalo** y deja un comentario `# FIX: ...` corto explicando.
 - Haz **commits granulares** por fase con mensajes descriptivos.
 - Si algo no está claro, **pregunta al usuario** en lugar de inventar.
+
+## 🚀 Plan de expansión (Fases 6–11)
+
+El proyecto base (Fases 0–5) está terminado. A partir de acá lo convertimos en
+una aplicación con menús, navegación y puntajes persistentes.
+
+| Fase | Entregable |
+|------|------------|
+| 6 | Setup assets nuevos (sounds/, puntajes.txt, menú imgs) + bonus gameplay (HUD balas reales, +1 vida y +1 bala max cada 3 niveles) |
+| 7 | Sistema de puntaje (variable puntaje, lectura de puntajes.txt en Game, "Points: N" en HUD) + sonidos (explosion.wav, ganar.mp3) |
+| 8 | PantallaNombreClass — input al batir récord, escribe nombre,puntaje en puntajes.txt |
+| 9 | MenuPuntajesClass — top 5 leído de archivo, botón "<" volver |
+| 10 | MenuAcercaDeClass — info + link clickeable a Hybridge, botón "<" volver |
+| 11 | MenuPrincipalClass + integración total (refactor main para que el menú sea entrada) |
+
+## 🧱 Convenciones para las nuevas clases de menú
+
+- Todas las clases de menú reciben `back_mtd` o callbacks por constructor
+  (NO singletons, NO globales).
+- Cada clase de menú vive en su propio archivo `MenuXxxClass.py`.
+- TODAS usan el patrón `@classmethod load_assets()` con autoload lazy en
+  `__init__`, igual que las clases del juego.
+- NO incluir `pygame.init()` ni `pygame.display.set_mode()` a nivel de módulo.
+  La ventana es una sola y se pasa por argumento o se reusa la misma.
+- Manejo de eventos: un solo `pygame.event.get()` por frame dentro del loop
+  de la clase. NO consumir eventos en métodos auxiliares.
+- Todas exponen un método público para mostrarse (`ejecutar()` / `mostrar()` /
+  `loop()`) que contiene su propio `while` loop.
+
+## 🎮 Mecánicas de puntaje y persistencia
+
+- Archivo: `puntajes.txt` en raíz del proyecto. Formato: `nombre,puntuacion\n`
+  por línea.
+- `Game.leer_registros(archivo)` → lista de tuplas `(nombre, puntuación)`
+  ordenada desc, top 5.
+- En el constructor de `Game`, leer `puntajes.txt` y guardar
+  `self.max_pun` = max histórico (0 si no hay registros) y `self.jugador` =
+  nombre del récord (si hay).
+- Variable `puntaje` en `main()`: suma 1 por cada enemy destruido por bala
+  del player.
+- Al GAME OVER: si `puntaje > game.max_pun` → reproducir `ganar.mp3` + lanzar
+  `PantallaNombre`. Si no → volver al menú principal.

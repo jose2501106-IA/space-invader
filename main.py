@@ -19,7 +19,7 @@ def start_music():
     """Inicia la música de fondo en loop. Si falla, loguea y sigue."""
     try:
         pygame.mixer.init()
-        pygame.mixer.music.load('music.mp3')
+        pygame.mixer.music.load('sounds/background_song.mp3')
         pygame.mixer.music.set_volume(0.4)
         pygame.mixer.music.play(-1)
     except pygame.error as e:
@@ -78,6 +78,8 @@ def main():
 
         # c-e) lógica del jugador
         player.create_bullets()
+        # HUD muestra balas listas reales (no decorativo).
+        game.reload_bullet(len(player.bullets))
         player.cooldown()
         player.move(WIDTH, HEIGHT)
 
@@ -112,6 +114,13 @@ def main():
         if not enemies:
             game.level += 1
             player.increase_speed()
+            # BALANCE: caps de 10 balas y 6 vidas vienen del .md original;
+            # iterar si se siente OP.
+            if game.level % 3 == 0:
+                if player.max_amount_bullets < 10:
+                    player.max_amount_bullets += 1
+                if game.lives < 6:
+                    game.lives += 1
             enemies = spawn_wave(game.level)
 
         # j) render encapsulado (fondo, enemigos, player, balas, HUD, flip)
