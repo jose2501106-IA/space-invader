@@ -9,6 +9,7 @@ from PlayerClass import Player
 from DrawingClass import Drawing
 from PantallaNombreClass import PantallaNombre
 from MenuPuntajesClass import MenuPuntajes
+from MenuAcercaDeClass import MenuAcercaDe
 
 
 WIDTH, HEIGHT = 800, 600
@@ -94,11 +95,17 @@ def main():
             break
 
         # TEMP-FASE-9: atajo 'P' abre MenuPuntajes desde el game loop.
-        # Borrar cuando MenuPrincipal sea el entry point (Fase 11).
+        # TEMP-FASE-10: atajo 'I' (info) abre MenuAcercaDe. NO usar 'A'
+        # porque WASD ya la usa para mover el player a la izquierda.
+        # Borrar ambos cuando MenuPrincipal sea el entry point (Fase 11).
         for ev in events:
             if ev.type == pygame.KEYDOWN and ev.key == pygame.K_p:
                 pygame.mixer.music.pause()
                 MenuPuntajes(window, back_mtd=lambda: None).ejecutar()
+                pygame.mixer.music.unpause()
+            elif ev.type == pygame.KEYDOWN and ev.key == pygame.K_i:
+                pygame.mixer.music.pause()
+                MenuAcercaDe(window, back_mtd=lambda: None).ejecutar()
                 pygame.mixer.music.unpause()
 
         # c-e) lógica del jugador
