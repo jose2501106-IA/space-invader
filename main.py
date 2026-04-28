@@ -1,11 +1,16 @@
+import random
 import sys
+
 import pygame
 
 from GameClass import Game
+from EnemyClass import Enemy
 
 
 WIDTH, HEIGHT = 800, 600
 FPS = 60
+ENEMY_INITIAL_SPEED = 2
+ENEMY_COUNT = 5
 
 
 def main():
@@ -18,8 +23,12 @@ def main():
 
     font = pygame.font.SysFont('comicsans', 30)
 
+    Enemy.load_assets()
+
     game = Game(font, FPS, lives=5, window=window,
                 screen_width=WIDTH, screen_height=HEIGHT, bullets=3)
+
+    enemies = Enemy(ENEMY_INITIAL_SPEED).create(ENEMY_COUNT, WIDTH)
 
     running = True
     while running:
@@ -31,6 +40,13 @@ def main():
             break
 
         window.fill((0, 0, 0))
+
+        for enemy in enemies:
+            enemy.move()
+            if enemy.y > HEIGHT:
+                enemy.y = random.randrange(-1000, -100)
+            enemy.draw(window)
+
         game.draw_HUD()
         pygame.display.update()
 
