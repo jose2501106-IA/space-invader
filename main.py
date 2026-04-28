@@ -7,6 +7,7 @@ from GameClass import Game
 from EnemyClass import Enemy
 from PlayerClass import Player
 from DrawingClass import Drawing
+from PantallaNombreClass import PantallaNombre
 
 
 WIDTH, HEIGHT = 800, 600
@@ -123,12 +124,17 @@ def main():
 
         # h) game over (chequeo no bloqueante)
         if game.over():
-            # Récord nuevo: ganar.mp3 + log. En Fase 8 esto lanza
-            # PantallaNombre para grabar el nombre del jugador.
+            # Récord nuevo → win sound + PantallaNombre para grabar nombre.
             if puntaje > game.max_pun:
                 if win_sound:
                     win_sound.play()
                 print(f'[NEW RECORD] {puntaje} > {game.max_pun}')
+                # Pausamos la música mientras el jugador escribe (la win
+                # sound y la música se solapan feo). En Fase 11 el callback
+                # finish_mtd llevará al menú principal; por ahora es no-op.
+                pygame.mixer.music.pause()
+                PantallaNombre(window, puntaje, finish_mtd=lambda: None).ejecutar()
+                pygame.mixer.music.unpause()
             # un último frame con el estado actual y luego la pantalla GO
             drawing.drawing(game, player, enemies, FPS, puntaje)
             game.show_game_over_screen()
