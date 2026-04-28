@@ -8,6 +8,7 @@ from EnemyClass import Enemy
 from PlayerClass import Player
 from DrawingClass import Drawing
 from PantallaNombreClass import PantallaNombre
+from MenuPuntajesClass import MenuPuntajes
 
 
 WIDTH, HEIGHT = 800, 600
@@ -91,6 +92,14 @@ def main():
         if game.escape(events):
             running = False
             break
+
+        # TEMP-FASE-9: atajo 'P' abre MenuPuntajes desde el game loop.
+        # Borrar cuando MenuPrincipal sea el entry point (Fase 11).
+        for ev in events:
+            if ev.type == pygame.KEYDOWN and ev.key == pygame.K_p:
+                pygame.mixer.music.pause()
+                MenuPuntajes(window, back_mtd=lambda: None).ejecutar()
+                pygame.mixer.music.unpause()
 
         # c-e) lógica del jugador
         player.create_bullets()

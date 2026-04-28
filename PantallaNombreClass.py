@@ -205,7 +205,7 @@ class PantallaNombre:
                                     and len(self.texto_input) < self.MAX_LEN):
                                 self.texto_input += ch
 
-                elif event.type == pygame.MOUSEBUTTONDOWN:
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     pos = event.pos
                     if self.input_rect.collidepoint(pos):
                         self.input_active = True
