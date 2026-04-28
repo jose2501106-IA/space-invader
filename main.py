@@ -26,6 +26,17 @@ def start_music():
         print(f'[warn] no se pudo iniciar la música: {e}')
 
 
+def load_sfx(path, volume=0.6):
+    """Carga un Sound. Devuelve None si falla, así el caller filtra con `if`."""
+    try:
+        s = pygame.mixer.Sound(path)
+        s.set_volume(volume)
+        return s
+    except (pygame.error, FileNotFoundError) as e:
+        print(f'[warn] no se pudo cargar {path}: {e}')
+        return None
+
+
 def spawn_wave(level):
     """Genera una nueva oleada para el nivel dado. Escalado leve a propósito.
     Nivel 1 arranca a speed puro (2.0); los siguientes escalan ×1.1 por nivel.
@@ -44,6 +55,8 @@ def main():
     pygame.display.set_caption('Space Invader')
 
     start_music()
+    explosion_sound = load_sfx('sounds/explosion.wav', volume=0.5)
+    win_sound = load_sfx('sounds/ganar.mp3', volume=0.7)
 
     font = pygame.font.SysFont('comicsans', 30)
 
@@ -64,6 +77,8 @@ def main():
     enemies = spawn_wave(game.level)
 
     drawing = Drawing(window)
+
+    puntaje = 0
 
     running = True
     while running:
@@ -96,6 +111,9 @@ def main():
             # Bala → enemigo: hit() ya remueve la bala internamente.
             if player.hit(enemy):
                 enemies.pop(i)
+                puntaje += 1
+                if explosion_sound:
+                    explosion_sound.play()
                 continue
             # Enemigo → jugador: pixel-perfect con offset relativo.
             offset = (int(enemy.x - player.x), int(enemy.y - player.y))
@@ -105,8 +123,14 @@ def main():
 
         # h) game over (chequeo no bloqueante)
         if game.over():
+            # Récord nuevo: ganar.mp3 + log. En Fase 8 esto lanza
+            # PantallaNombre para grabar el nombre del jugador.
+            if puntaje > game.max_pun:
+                if win_sound:
+                    win_sound.play()
+                print(f'[NEW RECORD] {puntaje} > {game.max_pun}')
             # un último frame con el estado actual y luego la pantalla GO
-            drawing.drawing(game, player, enemies, FPS)
+            drawing.drawing(game, player, enemies, FPS, puntaje)
             game.show_game_over_screen()
             break
 
@@ -124,7 +148,7 @@ def main():
             enemies = spawn_wave(game.level)
 
         # j) render encapsulado (fondo, enemigos, player, balas, HUD, flip)
-        drawing.drawing(game, player, enemies, FPS)
+        drawing.drawing(game, player, enemies, FPS, puntaje)
 
     pygame.mixer.music.stop()
     pygame.quit()

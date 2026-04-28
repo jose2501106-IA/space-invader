@@ -19,8 +19,10 @@ class Drawing:
         # set_mode, pero si no, lo hacemos ahora.
         if Drawing.BACKGROUND is None:
             Drawing.load_assets()
+        # Fuente propia para el HUD de puntaje (mismo estilo que Game.font).
+        self.font = pygame.font.SysFont('comicsans', 30)
 
-    def drawing(self, game, player, enemies, FPS):
+    def drawing(self, game, player, enemies, FPS, puntaje=0):
         # a) fondo
         self.window.blit(Drawing.BACKGROUND, (0, 0))
 
@@ -36,6 +38,14 @@ class Drawing:
 
         # e) HUD por encima de todo
         game.draw_HUD()
+
+        # e.2) puntaje centrado arriba (mismo eje y que Lives/Level).
+        points_label = self.font.render(
+            f'Points: {puntaje}', True, (255, 255, 255))
+        self.window.blit(
+            points_label,
+            (self.window.get_width() // 2 - points_label.get_width() // 2, 10),
+        )
 
         # f) overlay opcional de FPS reales (debug)
         if Drawing.DEBUG:
