@@ -4,6 +4,8 @@
 [![pygame-ce](https://img.shields.io/badge/pygame--ce-2.5.7-green.svg)](https://pyga.me/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
+![Demo del juego](screenshots/demo.gif)
+
 > Clon completo de **Space Invaders** en Python + pygame-ce. Construido en 14 fases iterativas con **Claude Code**, integra menú principal, sistema de récords persistente, pausa, navegación completa entre 5 pantallas y arquitectura orientada a objetos con 11 clases.
 
 ## 🎮 Demo
