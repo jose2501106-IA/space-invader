@@ -3,6 +3,9 @@
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![pygame-ce](https://img.shields.io/badge/pygame--ce-2.5.7-green.svg)](https://pyga.me/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![CI](https://github.com/jose2501106-IA/space-invader/actions/workflows/ci.yml/badge.svg)](https://github.com/jose2501106-IA/space-invader/actions/workflows/ci.yml)
+[![Tests](https://img.shields.io/badge/tests-26%20passing-brightgreen.svg)](tests/)
+[![Code Style](https://img.shields.io/badge/code%20style-ruff-orange.svg)](https://docs.astral.sh/ruff/)
 
 ![Demo del juego](screenshots/demo.gif)
 
@@ -138,6 +141,8 @@ Este proyecto fue construido íntegramente usando **Claude Code** (la CLI de pro
    - **Validación visual humana**: el desarrollador prueba manualmente cada fase antes de aprobar el commit, atrapando bugs que ningún test automático puede ver (como un logo solapando un título).
 3. **Commits granulares**: 14 commits, uno por fase, con mensajes descriptivos. Permite revertir o auditar cualquier paso del proceso.
 4. **Documentación de bugs detectados**: cada `# FIX:` en el código documenta un bug del material original o un edge case descubierto durante implementación. La tabla de "Bugs corregidos" más abajo viene 100% de esos comentarios.
+
+📖 Leé la metodología completa en [docs/METHODOLOGY.md](docs/METHODOLOGY.md).
 
 ### Las 14 fases del proyecto
 

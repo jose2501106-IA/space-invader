@@ -3,16 +3,15 @@ import sys
 
 import pygame
 
-from GameClass import Game
-from EnemyClass import Enemy
-from PlayerClass import Player
 from DrawingClass import Drawing
-from PantallaNombreClass import PantallaNombre
-from MenuPuntajesClass import MenuPuntajes
+from EnemyClass import Enemy
+from GameClass import Game
 from MenuAcercaDeClass import MenuAcercaDe
 from MenuInstruccionesClass import MenuInstrucciones
 from MenuPrincipalClass import MenuPrincipal
-
+from MenuPuntajesClass import MenuPuntajes
+from PantallaNombreClass import PantallaNombre
+from PlayerClass import Player
 
 WIDTH, HEIGHT = 800, 600
 FPS = 60

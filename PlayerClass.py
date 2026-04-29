@@ -1,7 +1,7 @@
 import pygame
 
-from ShipClass import Ship
 from BulletClass import Bullet
+from ShipClass import Ship
 
 
 class Player(Ship):
