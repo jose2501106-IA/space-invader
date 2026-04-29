@@ -215,3 +215,10 @@ objetivo fue partir de un material de referencia y construir, fase por fase,
 una aplicación completa con arquitectura limpia y persistencia de datos.
 
 Forks, issues y pull requests son bienvenidos.
+
+
+## 🙏 Acknowledgments
+
+- **Hybridge Education** — por el material base y la comunidad estudiantil
+- **Anthropic** — por Claude Code, el copiloto de desarrollo
+- **pygame-ce community** — por mantener el fork con wheels Python 3.14
