@@ -17,8 +17,17 @@
 ### Instrucciones
 ![Instrucciones](screenshots/instrucciones.png)
 
+### Acerca De
+![Acerca De](screenshots/acerca_de.png)
+
 ### Top de Puntajes
 ![Top 5 puntajes](screenshots/puntajes.png)
+
+### Batir el récord
+![PantallaNombre](screenshots/record.png)
+
+### Game Over
+![Game Over](screenshots/game_over.png)
 
 ## ✨ Características
 
